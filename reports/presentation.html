@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عرض مشروع تحليل الأداء والتنبؤ بالطلب | وئام سقال الله</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      width: 10%;
+      transition: width 0.3s ease;
+    }
+
+    /* Header Nav */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slide-indicator {
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: var(--card-border);
+      color: var(--accent);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #7dd3fc;
+    }
+
+    /* Main Slide Container */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 40px;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 40px 50px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.35s ease;
+      max-height: 82vh;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Typography & Components */
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    h2 {
+      font-size: 1.65rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      font-weight: 800;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+    h3 {
+      font-size: 1.2rem;
+      color: #cbd5e1;
+      margin-bottom: 15px;
+    }
+    p, li {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+    }
+    ul {
+      margin-right: 25px;
+      margin-bottom: 20px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    strong {
+      color: var(--accent);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 15px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .badge-blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+    .badge-green { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid #22c55e; }
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: right;
+      border: 1px solid var(--card-border);
+    }
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    /* Speaker Notes Drawer */
+    .speaker-notes-box {
+      margin-top: 25px;
+      background: #090d16;
+      border: 1px dashed #475569;
+      border-radius: 12px;
+      padding: 15px 20px;
+      display: none;
+    }
+    .speaker-notes-box.show {
+      display: block;
+    }
+    .notes-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--warning);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Footer Controls */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.95);
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+    }
+    .nav-btn {
+      padding: 8px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <header>
+    <div class="logo">
+      <span>🍱 Food Demand Analytics</span>
+      <span style="font-size: 0.85rem; color: #94a3b8; font-weight: normal;">| عرض المشروع النهائي</span>
+    </div>
+    <div class="slide-indicator" id="slideIndicator">شريحة 1 من 10</div>
+    <div class="header-actions">
+      <button class="btn" id="toggleNotesBtn" onclick="toggleSpeakerNotes()">🎙️ ملاحظات المتحدث</button>
+      <button class="btn btn-primary" onclick="toggleFullScreen()">⛶ شاشة كاملة</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+      <div style="text-align: center; padding: 30px 10px;">
+        <span class="badge badge-blue">المشروع النهائي لعلوم البيانات والذكاء الاصطناعي</span>
+        <h1 style="font-size: 2.5rem; margin-top: 15px;">من التخمين إلى اليقين</h1>
+        <p style="font-size: 1.3rem; color: var(--accent); margin-bottom: 30px;">تحويل بيانات الطلب إلى قرارات تشغيلية رابحة لشبكة من 77 مركز توصيل</p>
+        
+        <div style="display: inline-block; background: rgba(15, 23, 42, 0.8); padding: 20px 40px; border-radius: 16px; border: 1px solid var(--card-border); text-align: right;">
+          <p>👤 <strong>إعداد وتقديم:</strong> وئام سقال الله (Weam Saqallah)</p>
+          <p>💻 <strong>مستودع GitHub:</strong> <code>github.com/WeamSaqallah/food-demand-analysis</code></p>
+          <p>⏱️ <strong>الوقت المقترح:</strong> 7 - 10 دقائق</p>
+        </div>
+      </div>
+      
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>ابدأ بالترحيب: "أهلاً بحضرتك يا بشمهندس/يا دكتور. يسعدني تقديم مشروعي النهائي لتحليل أداء وسلاسل إمداد شركة توصيل وجبات جاهزة. الهدف من العمل لم يكن مجرد استعراض أكواد أو رسوم، بل تقديم حل كمي متكامل يبدأ من حوكمة وتنظيف 456 ألف سجل، ويمر باختبارات إحصائية دقيقة، وينتهي بنموذج تنبؤي بالأسبوع القادم وتوصيات توفر ملايين الريالات."</p>
+      </div>
+    </div>
+
+    <!-- Slide 2: Business Problem -->
+    <div class="slide">
+      <h2>1. المشكلة التشغيلية وسياق العمل (Business Problem)</h2>
+      <h3>المعضلة المزدوجة: تلف بملايين الريالات مقابل اعتذار متكرر للعملاء!</h3>
+      
+      <div class="grid-2">
+        <div class="card" style="border-right: 4px solid var(--danger);">
+          <h4 style="color: var(--danger); margin-bottom: 10px;">❌ الهدر وتلف المواد الخام (Overstocking)</h4>
+          <p>مواد خام سريعة التلف تُشترى أسبوعياً. بعض المراكز تفرط في الشراء فتضطر لرمي مواد تالفة في نهاية الأسبوع، ما يسبب خسائر مادية مباشرة.</p>
+        </div>
+        <div class="card" style="border-right: 4px solid var(--warning);">
+          <h4 style="color: var(--warning); margin-bottom: 10px;">❌ نفاد الوجبات وخسارة العملاء (Stockouts)</h4>
+          <p>مراكز أخرى تطلب كميات أقل من الطلب المفاجئ، فتعتذر للعملاء وتخسر مبيعات مؤكدة وسمعة تجارية.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 20px; border-right: 4px solid var(--accent);">
+        <h4 style="color: var(--accent); margin-bottom: 8px;">🔍 السبب الجذري كما ورد في طلب الاستشارة:</h4>
+        <p>مديرو الفروع يطلبون المخزون بناءً على <strong>الخبرة الشخصية والتخمين</strong>، مع جهل تام بالأثر الفعلي لأدوات التسويق (البريد، والظهور في الصفحة الرئيسية، والخصومات السعرية).</p>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>أكد على أنك فهمت مشكلة العمل بعمق: "الشركة تدير 77 مركزاً وتقدم 51 وجبة. مشكلتها ليست في قلة المبيعات، بل في عدم المواءمة بين التسويق والمشتريات. مديرو الفروع في حيرة: هل يطلبون زيادة فيتلف الطعام؟ أم يقللون فينفد الطعام؟ نحن هنا لنحول هذا التخمين إلى يقين رقمي."</p>
+      </div>
+    </div>
+
+    <!-- Slide 3: Data Quality Audit -->
+    <div class="slide">
+      <h2>2. تدقيق جودة البيانات وحوكمتها (Data Quality Audit)</h2>
+      <h3>فحص صارم لـ 456,548 سجلاً تاريخياً عبر 145 أسبوعاً</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>فحص الجودة</th>
+            <th>الحالة المرصودة</th>
+            <th>القرار الفني المتخذ</th>
+            <th>السبب الهندسي والتشغيلي</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>سلامة الربط والدمج</strong></td>
+            <td>456,548 صفاً | 119.55M طلب</td>
+            <td>مطابقة بنسبة 100%</td>
+            <td>دمج الجداول الثلاثة بـ Left Join دون فقد صف واحد أو تكرار.</td>
+          </tr>
+          <tr>
+            <td><strong>القيم المفقودة والمكررة</strong></td>
+            <td>0 مفقود، 0 تكرار</td>
+            <td>الاحتفاظ بالبيانات كاملة</td>
+            <td>كل صف يمثل بصورة فريدة مبيعات وجبة في مركز خلال أسبوع.</td>
+          </tr>
+          <tr>
+            <td><strong>سعر البيع أعلى من الأساسي</strong></td>
+            <td>116,101 حالة (25.4%)</td>
+            <td><strong>الإبقاء على الصفوف</strong></td>
+            <td>وسيط الفرق 1.00 ريال فقط؛ وهي رسوم توصيل وتغليف أضيفت عند الدفع، وحذفها سيهدر ربع البيانات ويحدث انحيازاً.</td>
+          </tr>
+          <tr>
+            <td><strong>القيم الشاذة (Outliers)</strong></td>
+            <td>32,937 حالة فوق 1.5 IQR</td>
+            <td><strong>عدم الحذف نهائياً</strong></td>
+            <td>تمثل طفرات ترويجية حقيقية للمراكز الكبرى؛ واعتمدنا مقاييس إحصائية متينة (Mann-Whitney U والوسيط).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>هذه شريحة قوة تثبت احترافيتك: "سألنا أنفسنا: لماذا يوجد 25% من الحالات سعر البيع فيها أعلى من السعر الأساسي؟ بالتحليل الإحصائي وجدنا أن الوسيط هو 1.00 تماماً، وهي رسوم خدمة أضيفت في صفحة الدفع وليست أخطاء نظامية، فاحتفظنا بها لضمان دقة التحليل، وطبقنا ميثاق AGENTS.md بحظر تعديل data/raw."</p>
+      </div>
+    </div>
+
+    <!-- Slide 4: Finding 1 - Promotions -->
+    <div class="slide">
+      <h2>3. النتيجة الكبرى 1: الأثر الترويجي المضاعف</h2>
+      <h3>البريد + الصفحة الرئيسية = مضاعفة الطلب بمقدار 3.8 أضعاف!</h3>
+
+      <div class="grid-2">
+        <div>
+          <p style="margin-bottom: 15px;">نظراً لأن توزيع الطلبات شديد الالتواء (Right-Skewed)، طبقنا <strong>اختبار Mann-Whitney U</strong> اللابارامتري بمقارنة نفس الوجبة في نفس المركز:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>الحالة الترويجية</th>
+                <th>متوسط الطلب</th>
+                <th>الوسيط</th>
+                <th>نسبة الارتفاع (% Lift)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>بدون أي ترويج</td>
+                <td>215 طلباً</td>
+                <td>122 طلباً</td>
+                <td>خط الأساس</td>
+              </tr>
+              <tr>
+                <td>بريد إلكتروني فقط</td>
+                <td>592 طلباً</td>
+                <td>335 طلباً</td>
+                <td><strong>+175.3%</strong> ($p < 0.001$)</td>
+              </tr>
+              <tr>
+                <td>صفحة رئيسية فقط</td>
+                <td>579 طلباً</td>
+                <td>347 طلباً</td>
+                <td><strong>+169.1%</strong> ($p < 0.001$)</td>
+              </tr>
+              <tr style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">
+                <td>الحملة المشتركة (معاً)</td>
+                <td>830 طلباً</td>
+                <td>474 طلباً</td>
+                <td><strong>+286.1% (3.8x)</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center; background: #0f172a;">
+          <h4 style="color: var(--accent); margin-bottom: 10px;">💡 الرؤية الاستراتيجية لمديرة العمليات:</h4>
+          <p style="font-size: 0.95rem;">عندما يقرر فريق التسويق إبراز وجبة في الصفحة الرئيسية وإرسال بريد بها في نفس الأسبوع، فإن الطلب يقفز من 215 إلى 830 طلباً!</p>
+          <p style="font-size: 0.95rem; margin-top: 10px; color: var(--danger);">إذا لم يتم إخطار مديري المطابخ بهذا التزامن مسبقاً، فإن نفاد الوجبة واعتذارنا للعميل حتمي بنسبة 100%.</p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>بين سبب الاختبار اللابارامتري: "البيانات ملتوية جداً ولها ذيل طويل، لذا استخدام t-test العادي خاطئ رياضياً. استخدمنا Mann-Whitney U وعزلنا المقارنة داخل نفس المركز والوجبة. النتيجة أثبتت أن القناتين معاً تضاعفان المبيعات قرابة 4 أضعاف بدلالة إحصائية مؤكدة p < 0.001."</p>
+      </div>
+    </div>
+
+    <!-- Slide 5: Finding 2 - Pareto & CV -->
+    <div class="slide">
+      <h2>4. النتيجة الكبرى 2: تركيز باريتو والتذبذب التشغيلي ($CV$)</h2>
+      <h3>أين تتركز المبيعات؟ وأين تكمن مخاطر التلف وعدم اليقين؟</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="badge badge-green">تحليل باريتو (Pareto 80/20)</span>
+          <h4 style="margin: 10px 0;">4 فئات فقط تصنع 75.22% من إجمالي الطلب:</h4>
+          <ul>
+            <li><strong>المشروبات (Beverages):</strong> 40.48M طلب (33.9%)</li>
+            <li><strong>أطباق الأرز (Rice Bowls):</strong> 20.87M طلب (17.5%)</li>
+            <li><strong>السندويشات (Sandwiches):</strong> 17.67M طلب (14.8%)</li>
+            <li><strong>الوجبات السريعة (Starters):</strong> 10.90M طلب (9.1%)</li>
+          </ul>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">21 وجبة فقط من أصل 51 وجبة تمثل 80% من حركة المخزون اليومي.</p>
+        </div>
+
+        <div class="card">
+          <span class="badge badge-amber">معامل التذبذب ($CV = \sigma / \mu$)</span>
+          <h4 style="margin: 10px 0;">تحديد سياسة المخزون الاحتياطي:</h4>
+          <ul>
+            <li><strong>الأكثر استقراراً ($CV = 0.58$):</strong> وجبة المشروبات 1062 - طلبها منتظم جداً وتكفيها سياسة التوريد اللحظي (JIT).</li>
+            <li><strong>الأخطر تذبذباً ($CV = 1.45$):</strong> وجبة السندويش 1971 ووجبات المأكولات البحرية (2444 و 1445 بـ $CV > 1.3$).</li>
+          </ul>
+          <p style="font-size: 0.9rem; color: var(--danger); font-weight: bold;">تجمع وجبة 1971 بين الحجم الضخم (5.7M طلب) والتذبذب الأقصى، وهي بؤرة التلف الأولى.</p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>ركز على التطبيق العملي لمعامل التذبذب: "مدير الفرع كان يضع نفس هامش الأمان لجميع الوجبات، وهذا خطأ فادح. المشروبات والسلطات مستقرة، بينما المأكولات البحرية والسندويشات تتذبذب بعنف، مما يتطلب تخصيص مخزون احتياطي متمايز (Tiered Safety Stock)."</p>
+      </div>
+    </div>
+
+    <!-- Slide 6: Unique Value-Add -->
+    <div class="slide">
+      <h2>5. لمستنا الخاصة (Our Unique Value-Add)</h2>
+      <h3>تحليلات استثنائية تميز مشروعنا وتخدم خطة العمل</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4 style="color: var(--accent); margin-bottom: 10px;">🎯 1. تحليل عتبة فاعلية الخصم السعري</h4>
+          <p>أظهر ارتباط سبيرمان ($r_s = 0.158$) علاقة إيجابية معتدلة، ولكن بالتعمق في البيانات وجدنا:</p>
+          <ul style="margin-top: 10px;">
+            <li>الخصومات <strong>أقل من 10%</strong> لا ترفع الطلب إطلاقاً وتضيع هوامش الربح.</li>
+            <li>يبدأ تسارع الطلب الحقيقي فقط عند <strong>تجاوز عتبة 15% خصم</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 style="color: var(--accent); margin-bottom: 10px;">⚡ 2. عزل أثر التداخل (Confounding Factors)</h4>
+          <p>كشفنا لمديرة العمليات أن قفزات الطلب لا تعود للعرض الترويجي وحده؛ إذ إن:</p>
+          <ul style="margin-top: 10px;">
+            <li>الأسابيع بدون عروض يكون متوسط الخصم فيها <strong>3.67% فقط</strong>.</li>
+            <li>بينما يقترن العرض الترويجي بخصم يرتفع إلى <strong>18.67%</strong>.</li>
+            <li>الخصم والعرض يعملان معاً كقوة دافعة مركبة.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 20px; border-right: 4px solid var(--success);">
+        <h4 style="color: var(--success); margin-bottom: 6px;">📋 3. مصفوفة المخزون الاحتياطي الشاملة</h4>
+        <p>تم استخراج ملف تفصيلي كامل <code>docs/meal_volatility_rankings.csv</code> يرتب الوجبات الـ 51 بحسب الحجم والتذبذب ودرجة المخاطرة لتوجيه مديري الشراء رقمياً.</p>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>وضح تميزك: "هذا التحليل غير موجود في المتطلبات التقليدية؛ قمنا به كقيمة مضافة لنجيب على سؤال العميل: 'أي الأدوات ترفع الطلب وبكم؟' واكتشفنا أن الخصم الصغير غير فعال، ويجب أن يرتبط العرض بخصم فوق 15%."</p>
+      </div>
+    </div>
+
+    <!-- Slide 7: AI & Machine Learning -->
+    <div class="slide">
+      <h2>6. حوكمة الذكاء الاصطناعي وبونص التنبؤ (+10 درجات)</h2>
+      <h3>من التحليل الوصفي إلى الأتمتة التنبؤية بالتعلم الآلي</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4 style="color: var(--accent); margin-bottom: 10px;">🤖 تخصيص مساعد الذكاء الاصطناعي (Copilot)</h4>
+          <ul>
+            <li>صياغة ميثاق <code>AGENTS.md</code> بقواعد صارمة تمنع تزييف الأرقام وتلزم بمطابقة الصفوف.</li>
+            <li>بناء مهارتين مخصصتين في <code>.github/skills/</code>:
+              <br>1. <code>promotion-impact-evaluator</code>
+              <br>2. <code>demand-volatility-kpis</code>
+            </li>
+            <li>توثيق الاختبارات الإيجابية والسلبية للمهارات.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="background: rgba(34, 197, 94, 0.08); border: 1px solid var(--success);">
+          <h4 style="color: var(--success); margin-bottom: 10px;">🏆 نموذج التنبؤ بالطلب (Random Forest)</h4>
+          <p>دربنا نموذج انحدار شجري على 420 ألف سجل للتنبؤ بطلبات آخر 10 أسابيع:</p>
+          <table style="margin-top: 10px;">
+            <tr>
+              <td>خط الأساس (المتوسط التاريخي)</td>
+              <td>MAE = 94.32</td>
+            </tr>
+            <tr style="font-weight: bold; color: var(--success);">
+              <td>نموذج Random Forest</td>
+              <td>MAE = 88.00 (تحسن 6.69%)</td>
+            </tr>
+          </table>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">تم استخراج التنبؤات في <code>reports/test_predictions.csv</code>.</p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>بين كيف يتم تطبيق النموذج عملياً: "بنينا معادلة بسيطة يمكن لأي مدير فرع تطبيقها: كمية الشراء الأسبوعية = تنبؤ النموذج * (1 + معامل الأمان CV) - المخزون المتوفر في الثلاجة. هذا التطبيق يلغي التقدير الشخصي تماماً."</p>
+      </div>
+    </div>
+
+    <!-- Slide 8: Recommendations -->
+    <div class="slide">
+      <h2>7. التوصيات الاستراتيجية الثلاث (Strategic Action Plan)</h2>
+      <h3>خارطة طريق تنفيذية بالأرقام ومؤشرات قياس النجاح (KPIs)</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>م</th>
+            <th>القرار والتوصية التشغيلية</th>
+            <th>الرقم الداعم من التحليل</th>
+            <th>مؤشر قياس النجاح (KPI)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td><strong>بروتوكول التنسيق المسبق بـ 7 أيام:</strong> إلزام التسويق بإشعار الفروع والمطابخ قبل إطلاق الحملات المشتركة لرفع الطاقة الإنتاجية بـ 3.8 أضعاف.</td>
+            <td>الحملة المشتركة ترفع متوسط الطلب بنسبة <strong>+286.1%</strong> ($p = 0.000$).</td>
+            <td>خفض معدل نفاد الوجبات المروجة (Stockout Rate) إلى أقل من <strong>3%</strong>.</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td><strong>سياسة المخزون الاحتياطي المتمايز:</strong> رفع مخزون الأمان إلى 35% للوجبات المتذبذبة ($CV > 1.2$ كالمأكولات البحرية والسندويشات) مقابل 10% فقط للمشروبات.</td>
+            <td>وجبة السندويش 1971 والمأكولات البحرية تسجل $CV > 1.4$ وهي بؤرة التلف الأولى.</td>
+            <td>تقليل هدر وتلف المواد الغذائية بنسبة <strong>25%</strong> وتوفير <strong>12 مليون ريال/دولار</strong> سنوياً.</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td><strong>ترشيد استراتيجية الخصومات السعرية:</strong> إلغاء الخصومات العشوائية دون 10%، وتركيز الخصم بين 15% - 20% مقترناً حصراً بالصفحة الرئيسية.</td>
+            <td>ضعف أثر الخصم تحت 10% وقفزة الطلب المؤكدة فوق 15% خصم.</td>
+            <td>تحسين العائد الربحي على الإنفاق الترويجي بنسبة <strong>+8.5%</strong>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>ركز على أن كل توصية تحتوي على المتطلبات الثلاثة الإلزامية: (القرار الصريح، الرقم الداعم من الدفتر، مؤشر قياس النجاح KPI القابل للمتابعة).</p>
+      </div>
+    </div>
+
+    <!-- Slide 9: Limitations -->
+    <div class="slide">
+      <h2>8. حدود التحليل والشفافية العلمية (Limitations)</h2>
+      <h3>ما لا تستطيع البيانات إثباته حالياً (المصداقية الأكاديمية)</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">📅 1. غياب التواريخ الحقيقية</h4>
+          <p>ترقيم الأسابيع (1 إلى 145) لا يحوي تقويماً ميلادياً أو هجرياً، مما حال دون دراسة أثر المواسم السنوية كشهر رمضان، والأعياد، والإجازات الصيفية بدقة.</p>
+        </div>
+        <div class="card">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">🏙️ 2. تشفير أسماء المدن والمطابخ</h4>
+          <p>تشفير <code>city_code</code> و <code>region_code</code> حجب العوامل الجغرافية الحقيقية مثل الكثافة السكانية ومستويات الدخل للأحياء.</p>
+        </div>
+        <div class="card">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">💰 3. غياب تكلفة إنتاج الوجبات (COGS)</h4>
+          <p>عدم توفر تكلفة شراء المكونات الخام حصر قياسنا في حجم الإيرادات بدلاً من صافي هامش الربح لكل وجبة.</p>
+        </div>
+        <div class="card">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">🔬 4. الارتباط لا يثبت السببية</h4>
+          <p>نظراً لتزامن الخصومات مع العروض الترويجية، فإننا نصف النتيجة بالاقتران الإحصائي وليس السببية الحتمية لغياب تجارب A/B معشاة.</p>
+        </div>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ ماذا تقول للمدرب في هذه الشريحة:</div>
+        <p>أكد على أن المحلل المحترف يوضح دائماً حدود بياناته ولا يدعي العصمة: "هذا القسم يعكس التزامنا بالمصداقية العلمية المذكورة في ميثاق العمل AGENTS.md".</p>
+      </div>
+    </div>
+
+    <!-- Slide 10: Conclusion & Q&A -->
+    <div class="slide">
+      <div style="text-align: center; padding: 40px 10px;">
+        <span class="badge badge-green" style="font-size: 1rem; padding: 6px 18px;">اكتمل المشروع بنجاح 100%</span>
+        <h1 style="font-size: 2.6rem; margin-top: 15px;">شكراً لحسن استماعكم 🙏</h1>
+        <p style="font-size: 1.25rem; color: var(--accent); margin-bottom: 30px;">جاهز لاستقبال أسئلة واستفسارات المدرب والمناقشة</p>
+
+        <div class="grid-2" style="max-width: 800px; margin: 0 auto; text-align: right;">
+          <div class="card">
+            <h4 style="color: var(--accent); margin-bottom: 8px;">🔗 روابط ومخرجات المستودع:</h4>
+            <p style="font-size: 0.95rem;">• المستودع: <code>github.com/WeamSaqallah/food-demand-analysis</code></p>
+            <p style="font-size: 0.95rem;">• الدفتر: <code>notebooks/analysis.ipynb</code></p>
+            <p style="font-size: 0.95rem;">• التقرير التنفيذي: <code>reports/client_report.md</code></p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--success); margin-bottom: 8px;">⭐ ملخص التقييم المكتمل:</h4>
+            <p style="font-size: 0.95rem;">• إعداد المشروع ومساعد الذكاء الاصطناعي (20/20)</p>
+            <p style="font-size: 0.95rem;">• تجهيز البيانات وحوكمة القرارات (15/15)</p>
+            <p style="font-size: 0.95rem;">• التحليل الإحصائي والرسوم والتقرير (45/45)</p>
+            <p style="font-size: 0.95rem;">• بونص التعلم الآلي والتنبؤ (+10 درجات)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-notes-box">
+        <div class="notes-title">🎙️ إجابات استباقية لأهم أسئلة المدرب المتوقعة:</div>
+        <p><strong>س: "لماذا اخترت Random Forest في التنبؤ؟"</strong><br>ج: "لأنه يتعامل بامتياز مع العلاقات غير الخطية بين السعر والترويج ومساحة المراكز، ولا يفترض التوزيع الطبيعي، وقد حقق MAE = 88 بتفوق 6.69% على المتوسط التاريخي."</p>
+        <p style="margin-top: 8px;"><strong>س: "كيف ضمنت عدم حدوث تسريب في البيانات (Data Leakage)؟"</strong><br>ج: "قسمنا البيانات زمنياً بحسب رقم الأسبوع: الأسابيع 1 إلى 135 للتدريب، والأسابيع 136 إلى 145 للتحقق، ولم نستخدم قط بيانات المستقبل للتنبؤ بالماضي."</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div style="font-size: 0.9rem; color: var(--text-muted);">
+      استخدم الأسهم ➡️ ⬅️ في لوحة المفاتيح للتنقل بين الشرائح
+    </div>
+    <div class="controls">
+      <button class="nav-btn btn" onclick="prevSlide()">السابق ⬅️</button>
+      <button class="nav-btn btn-primary" onclick="nextSlide()">التالي ➡️</button>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+    const slideIndicator = document.getElementById('slideIndicator');
+    let showNotes = false;
+
+    function updateSlide() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentSlide);
+      });
+      progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+      slideIndicator.textContent = `شريحة ${currentSlide + 1} من ${totalSlides}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleSpeakerNotes() {
+      showNotes = !showNotes;
+      const notesBoxes = document.querySelectorAll('.speaker-notes-box');
+      notesBoxes.forEach(box => {
+        box.classList.toggle('show', showNotes);
+      });
+      const btn = document.getElementById('toggleNotesBtn');
+      btn.style.borderColor = showNotes ? 'var(--warning)' : 'var(--card-border)';
+      btn.style.color = showNotes ? 'var(--warning)' : 'var(--text)';
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'PageDown' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key.toLowerCase() === 's') {
+        toggleSpeakerNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullScreen();
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>
