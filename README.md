@@ -1,5 +1,7 @@
 # 🍱 مشروع تحليل الأداء والتنبؤ بالطلب لشركة توصيل وجبات جاهزة (Food Demand Analysis)
 
+**إعداد وتطوير:** [وئام سقال الله (Weam Saqallah)](https://github.com/WeamSaqallah) | **المسار:** الذكاء الاصطناعي وعلوم البيانات (AI & Data Science)
+
 مستودع برمجي متكامل لتحليل سلاسل الإمداد، واختبار الأثر الإحصائي للحملات الترويجية والخصومات، والتنبؤ بالطلب الأسبوعي لشبكة من 77 مركز تجهيز عبر 145 أسبوعاً من البيانات التاريخية.
 
 ---
@@ -89,7 +91,7 @@ pip install pandas numpy scipy scikit-learn matplotlib seaborn
 ### خطوات التشغيل
 1. استنساخ المستودع:
 ```bash
-git clone https://github.com/weam/food-demand-analysis.git
+git clone https://github.com/WeamSaqallah/food-demand-analysis.git
 cd food-demand-analysis
 ```
 2. تشغيل فحص البيانات والتحليل الكامل وتوليد الرسوم:
